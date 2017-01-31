@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import List from './List';
-import Form from './Form';
-import Divider from 'material-ui/Divider';
+import Location from './Location';
 import IdbApi from './idb';
 
+import muiThemeable from 'material-ui/styles/muiThemeable';
 class Home extends Component {
 
     componentWillMount() {
@@ -11,18 +11,17 @@ class Home extends Component {
             guestList: [],
             message: '',
             name: '',
-            imageUploading: false
+            imageUploading: false,
+            drawer: false
         });
     }
-
 
     componentDidMount() {
 
         let self = this;
         let tempList = [];
 
-        if (this.props.connectedStatus) {
-            console.log(' connected');
+        if (this.props.firebaseConnected) {
             this.props.guests.on('value', snap => {
                 this.setState({guestList: []}, function () {
                     snap.forEach(function (newPerson) {
@@ -31,6 +30,8 @@ class Home extends Component {
                             name: newPerson.val().name,
                             image: newPerson.val().image,
                             time: newPerson.val().time,
+                            lat: newPerson.val().lat,
+                            lng: newPerson.val().lng,
                             key: newPerson.key,
                         };
                         tempList.push(person);
@@ -46,39 +47,14 @@ class Home extends Component {
             });
         }
         else {
-            console.log('disconnected');
             IdbApi.getGuests().then(function (guests) {
-                console.log('getting guests: ', guests);
                 self.setState({guestList: guests.reverse()});
             });
         }
     }
 
-    addGuest(name, message, image) {
-
-        let self = this;
-            let upload = this.props.images.child(name).put(image);
-            upload.on('state_changed', function (snap) {
-            }, function (error) {
-            }, function () {
-                let newGuest = {
-                    message: message,
-                    name: name,
-                    image: upload.snapshot.downloadURL,
-                    time: new Date().toISOString()
-                };
-
-                if (self.props.connectedStatus) {
-                    self.props.guests.push(newGuest);
-                } else {
-                    IdbApi.saveGuest(newGuest);
-                }
-
-            });
-    }
-
     deleteGuest(key, name) {
-        if (this.props.connectedStatus) {
+        if (this.props.firebaseConnected) {
             this.props.guests.child(key).remove();
             this.props.images.child(name).delete().then(function () {
                 console.log('file deleted');
@@ -87,17 +63,27 @@ class Home extends Component {
         IdbApi.deleteGuest(key);
     }
 
+    setMap(map) {
+        this.setState({
+            map: map
+        });
+    }
+
+    zoomMap(item) {
+        this.state.map.panTo({lat: item.lat, lng: item.lng});
+    }
+
+
     render() {
         return (
-            <div>
-                <div>Guestbook</div>
-                <Form guests={this.props.guests} images={this.props.images} addGuest={this.addGuest.bind(this)}/>
-                <Divider/>
-                <List list={this.state.guestList} guests={this.props.guests} images={this.props.images} deleteGuest={this.deleteGuest.bind(this)}/>
-            </div>
-
+                <div className="pure-g">
+                    <Location list={this.state.guestList} setMapOnParent={this.setMap.bind(this)}/>
+                    <List list={this.state.guestList} images={this.props.images}
+                          deleteGuest={this.deleteGuest.bind(this)}
+                          zoomMap={this.zoomMap.bind(this)}/>
+                </div>
         );
     }
 }
 
-export default Home;
+export default muiThemeable()(Home);

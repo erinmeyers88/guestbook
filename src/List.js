@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {Card, CardActions, CardText, CardMedia, CardTitle} from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 import Masonry from 'react-masonry-component';
+import FontIcon from 'material-ui/FontIcon';
+import muiThemeable from 'material-ui/styles/muiThemeable';
 
 class List extends Component {
     //
@@ -21,7 +23,7 @@ class List extends Component {
     render() {
         let self = this;
         return (
-            <div className="pure-g" style={{padding: 20, backgroundColor: 'red', minHeight: 'calc(100vh - 487px)'}}>
+            <div className="pure-u-1-2" style={{padding: 20, backgroundColor: this.props.muiTheme.palette.accent1Color, minHeight: 'calc(100vh - 487px)', boxSizing: 'border-box', height: 600, overflowY: 'auto'}}>
                     <Masonry elementType="div" options={{transitionDuration: '.5s'}}>
                         {this.props.list.map(function (item, key) {
                             return (
@@ -37,8 +39,13 @@ class List extends Component {
                                             {item.message}
                                         </CardText>
                                         <CardActions>
+                                            <FlatButton onTouchTap={self.props.zoomMap.bind(self, item)}
+                                                        label="Find Me"
+                                                        icon={<FontIcon className="fa fa-map-marker"/>}/>
                                             <FlatButton label="Delete"
-                                                        onTouchTap={self.handleDeleteGuest.bind(self, item.key, item.name)}/>
+                                                        onTouchTap={self.handleDeleteGuest.bind(self, item.key, item.name)}
+                                            />
+
                                         </CardActions>
                                     </Card>
                                 </div>
@@ -50,4 +57,4 @@ class List extends Component {
     }
 }
 
-export default List;
+export default muiThemeable()(List);

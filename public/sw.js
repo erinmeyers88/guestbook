@@ -1,4 +1,4 @@
-var staticCacheName = 'guestbook-static-v1';
+var staticCacheName = 'guestbook-static-v2';
 // var contentImgsCache = 'guestbook-images';
 // var allCaches = [
 //     staticCacheName,
@@ -10,8 +10,9 @@ self.addEventListener('install', function(event) {
     event.waitUntil(
         caches.open(staticCacheName).then(function(cache) {
             return cache.addAll([
-                '/static',
-                '/purecss'
+                '/',
+                '/static/',
+                '/purecss/'
             ]);
         })
     );
@@ -34,31 +35,39 @@ self.addEventListener('install', function(event) {
 // });
 //
 self.addEventListener('fetch', function(event) {
-    console.log('fetch', event.request.url);
+    // console.log('fetch', event.request.url);
     // var requestUrl = new URL(event.request.url);
-    //
+
     // if (requestUrl.origin === location.origin) {
+    //     console.log('here');
     //     if (requestUrl.pathname === '/') {
-    //         event.respondWith(caches.match('/static'));
+    //         event.respondWith(caches.match('/offline.html'));
     //         // event.respondeWith(caches.match('/purecss'));
     //         return;
     //     }
-    //     if (requestUrl.pathname.startsWith('/photos/')) {
-    //         event.respondWith(servePhoto(event.request));
-    //         return;
-    //     }
-    //
-    //     if (requestUrl.pathname.startsWith('/avatars/')) {
-    //         event.respondWith(serveAvatar(event.request));
-    //         return;
-    //     }
+    // }
+
+    // if (event.request.mode === 'navigate' || (event.request.method === 'GET' && event.request.headers.get('accept').includes('text/html'))) {
+    //     console.log('here');
+    //     event.respondWith(
+    //         fetch(event.request.url).catch(error => {
+    //             console.log('error: ', error);
+    //             // Return the offline page
+    //             return caches.match('/offline.html');
+    //         })
+    //     );
     // }
     //
-    // event.respondWith(
-    //     caches.match(event.request).then(function(response) {
-    //         return response || fetch(event.request);
-    //     })
-    // );
+    // else {
+    //     console.log('here bottom');
+        event.respondWith(
+            caches.match(event.request).then(function(response) {
+                return response || fetch(event.request);
+            })
+        );
+    // }
+
+
 });
 //
 // function serveAvatar(request) {
